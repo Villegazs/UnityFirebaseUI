@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "273745821341",
+    "firebase_url": "https://unity-firebaseui-default-rtdb.firebaseio.com",
+    "project_id": "unity-firebaseui",
+    "storage_bucket": "unity-firebaseui.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:273745821341:android:1ff0747e956a070d02de74",
+        "android_client_info": {
+          "package_name": "com.utopicHealers.FirebaseLobby"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBn9exafUH7WeflcpnXmfUfONjvXu4ZPQk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
