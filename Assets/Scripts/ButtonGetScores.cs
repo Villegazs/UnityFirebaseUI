@@ -20,7 +20,7 @@ public class ButtonGetScores : MonoBehaviour
         _buttonGetLeaderboard.onClick.AddListener(GetUsersHighestScores);
 
         FirebaseDatabase.DefaultInstance.GetReference("users")
-          .OrderByChild("score").LimitToLast(3)
+        .OrderByChild("score").LimitToLast(3)
         .ValueChanged += HandleValueChanged;
     }
 

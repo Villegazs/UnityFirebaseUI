@@ -54,11 +54,13 @@ public class UsersOnline : MonoBehaviour
 
 
         DataSnapshot snapshot = args.Snapshot;
+        
 
         Debug.Log($"User added: {snapshot.Key}");
 
         try
         {
+
             // Handle the new user data here
             if (snapshot.HasChildren)
             {

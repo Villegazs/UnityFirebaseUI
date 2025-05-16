@@ -1,7 +1,9 @@
 using Firebase.Auth;
 using Firebase.Database;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
+using static UnityEngine.Rendering.GPUSort;
 
 public class PendingFriendResponse : MonoBehaviour
 {
@@ -11,7 +13,7 @@ public class PendingFriendResponse : MonoBehaviour
         var mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
         var userId = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
 
-        var reference = mDatabaseRef.Child("users").Child(userId).Child("friendResponse");
+        var reference = mDatabaseRef.Child("users").Child(userId).Child("SendRequests");
         reference.ChildAdded += HandleChildAdded;
         //reference.ChildRemoved += HandleChildRemoved;
     }
@@ -60,7 +62,7 @@ public class PendingFriendResponse : MonoBehaviour
             Debug.Log(friendUsermane + " ha rechazado tu solicitud");
         }
         eliminarSolicitud(friendId, "SendRequests");
-        eliminarSolicitud(friendId, "friendResponse");
+        eliminarSolicitud(userId, "friendResponse");
 
     }
 
@@ -74,5 +76,37 @@ public class PendingFriendResponse : MonoBehaviour
                            .Child(requestMailbox)
                            .Child(requestUserId)
                            .SetValueAsync(null);
+    }
+
+    private void AddFriend(DataSnapshot snapshot, string friendUserId)
+    {
+        var mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
+        var userId = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
+        var username = PlayerPrefs.GetString("username");
+
+
+        foreach (var userDoc in (Dictionary<string, object>)snapshot.Value)
+        {
+            var userObject = (Dictionary<string, object>)userDoc.Value;
+            Debug.Log(userDoc.Key);
+
+            Debug.Log(userObject["username"] + " | " + userObject["score"]);
+
+        }
+
+        mDatabaseRef.Child("users")
+            .Child(friendUserId)
+            .Child("friends")
+            .Child(userId)
+            .SetValueAsync(username).ContinueWith(t =>
+            {
+                //Manejar el Error
+                mDatabaseRef.Child("users")
+                   .Child(userId)
+                   .Child("friends")
+                   .Child(friendUserId)
+                   .SetValueAsync(0);
+                //Establece estado 0 para solicitud pendiente
+            });
     }
 }
