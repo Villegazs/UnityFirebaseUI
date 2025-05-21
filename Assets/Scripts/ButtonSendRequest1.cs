@@ -10,6 +10,7 @@ public class ButtonSendRequest : MonoBehaviour
     [SerializeField] private Button _addFriendButton;
     [SerializeField] private string friendUserId;
     [SerializeField] private TextMeshProUGUI statusText;
+    [SerializeField] private TMP_InputField addFriendInputField;
 
     private string currentUserId;
 
@@ -21,6 +22,7 @@ public class ButtonSendRequest : MonoBehaviour
 
     private async void HandleAddFriendButtonClicked()
     {
+        friendUserId = addFriendInputField.text;
         // 1. Verificar autoenvío
         if (friendUserId == currentUserId)
         {
@@ -48,12 +50,12 @@ public class ButtonSendRequest : MonoBehaviour
             }
 
             // 4. Verificar si ya son amigos
-            bool alreadyFriends = await CheckIfFriends(currentUserId, friendUserId);
+           /* bool alreadyFriends = await CheckIfFriends(currentUserId, friendUserId);
             if (alreadyFriends)
             {
                 UpdateStatus("Ya son amigos");
                 return;
-            }
+            }*/
 
             // 5. Verificar solicitud existente
             bool requestExists = await CheckIfRequestExists(friendUserId, currentUserId);
@@ -64,8 +66,8 @@ public class ButtonSendRequest : MonoBehaviour
             }
 
             // Si pasa todas las validaciones, enviar solicitud
-            await SendFriendRequest(friendUserId);
             UpdateStatus("¡Solicitud enviada!");
+            await SendFriendRequest(friendUserId);
         }
         catch (System.Exception ex)
         {
@@ -84,6 +86,8 @@ public class ButtonSendRequest : MonoBehaviour
 
     private async Task<bool> CheckIfFriends(string userId1, string userId2)
     {
+        Debug.Log("Check If friend exists");
+
         var snapshot = await FirebaseDatabase.DefaultInstance
             .GetReference($"users/{userId1}/friends/{userId2}")
             .GetValueAsync();
@@ -92,6 +96,8 @@ public class ButtonSendRequest : MonoBehaviour
 
     private async Task<bool> CheckIfRequestExists(string targetUserId, string senderUserId)
     {
+        Debug.Log("Check If Request exists");
+
         var snapshot = await FirebaseDatabase.DefaultInstance
             .GetReference($"users/{targetUserId}/friendRequests/{senderUserId}")
             .GetValueAsync();
@@ -114,7 +120,7 @@ public class ButtonSendRequest : MonoBehaviour
         // Registrar en el remitente
         await FirebaseDatabase.DefaultInstance
             .GetReference($"users/{currentUserId}/SendRequests/{targetUserId}")
-            .SetValueAsync(1);
+            .SetValueAsync(0);
     }
 
     private void UpdateStatus(string message)

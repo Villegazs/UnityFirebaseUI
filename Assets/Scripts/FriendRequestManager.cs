@@ -1,11 +1,18 @@
 using Firebase.Auth;
 using Firebase.Database;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using TMPro;
+using UnityEngine.UI;
 
 public class FriendRequestManager : MonoBehaviour
 {
     private string currentUserId;
+    [SerializeField] private GameObject friendRequestPrefab;
+    [SerializeField] private Transform requestsContainer;
+
+    private Dictionary<string, FriendRequestDisplay> instantiatedFriendsRequest = new Dictionary<string, FriendRequestDisplay>();
 
     void OnEnable()
     {
@@ -17,12 +24,71 @@ public class FriendRequestManager : MonoBehaviour
     {
         var dbRef = FirebaseDatabase.DefaultInstance.RootReference;
 
-        // Escuchar nuevas respuestas a solicitudes enviadas
-        var reference = dbRef.Child("users")
+        // Escuchar respuestas a solicitudes enviadas (SendRequests)
+            var sentRequestsRef = dbRef.Child("users")
              .Child(currentUserId)
              .Child("SendRequests");
-        
-        reference.ChildAdded += HandleRequestResponseAdded;
+        sentRequestsRef.ChildAdded += HandleRequestResponseAdded;
+
+        // Escuchar nuevas solicitudes recibidas (friendRequests)
+        var receivedRequestsRef = dbRef.Child("users")
+             .Child(currentUserId)
+             .Child("friendRequests");
+        receivedRequestsRef.ChildAdded += HandleNewRequestAdded;
+        receivedRequestsRef.ChildRemoved += HandleRequestRemoved;
+    }
+    private async void HandleNewRequestAdded(object sender, ChildChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+
+        DataSnapshot snapshot = args.Snapshot;
+        string senderId = snapshot.Key;
+        string senderData = snapshot.Value.ToString();
+
+        // Parsear datos del solicitante (formato: "Nombre|score")
+        string[] senderParts = senderData.Split('|');
+        string senderName = senderParts[0];
+
+        if (!instantiatedFriendsRequest.ContainsKey(senderId))
+        {
+            GameObject requestObj = Instantiate(friendRequestPrefab, requestsContainer);
+            FriendRequestDisplay display = requestObj.GetComponent<FriendRequestDisplay>();
+            display.Initialize(senderId, senderName, HandleRequestDecision);
+            instantiatedFriendsRequest.Add(senderId, display);
+        }
+    }
+
+    private void HandleRequestRemoved(object sender, ChildChangedEventArgs args)
+    {
+        string senderId = args.Snapshot.Key;
+        if (instantiatedFriendsRequest.TryGetValue(senderId, out var display))
+        {
+            Destroy(display.gameObject);
+            instantiatedFriendsRequest.Remove(senderId);
+        }
+    }
+    private async void HandleRequestDecision(string senderId, int decision)
+    {
+        // decision: 1 = Aceptar, 2 = Rechazar
+        if (decision == 1)
+        {
+            // Añadir como amigos en ambos usuarios
+            string senderName = await GetUserUsername(senderId);
+            await AddFriend(currentUserId, senderId, senderName);
+            //await AddFriend(senderId, currentUserId, FirebaseAuth.DefaultInstance.CurrentUser.DisplayName);
+        }
+
+        // Eliminar la solicitud
+        await RemoveRequest(senderId, "friendRequests");
+
+        // Notificar al remitente de la decisión
+        await FirebaseDatabase.DefaultInstance
+            .GetReference($"users/{senderId}/SendRequests/{currentUserId}")
+            .SetValueAsync(decision);
     }
 
     private async void HandleRequestResponseAdded(object sender, ChildChangedEventArgs args)
@@ -50,7 +116,6 @@ public class FriendRequestManager : MonoBehaviour
             return;
         }
 
-        // Obtener nombre del amigo
         string friendUsername = await GetUserUsername(friendId);
 
         switch (responseStatus)
@@ -60,7 +125,7 @@ public class FriendRequestManager : MonoBehaviour
                 break;
 
             case 2: // Solicitud rechazada
-                Debug.Log($"{friendUsername} ha rechazado tu solicitud");
+                await HandleDeclineRequest(friendId, friendUsername);
                 break;
 
             default:
@@ -68,34 +133,28 @@ public class FriendRequestManager : MonoBehaviour
                 break;
         }
 
-        // Limpiar solicitudes de ambos lados
-        //await CleanupRequests(friendId);
+        //await RemoveRequest(friendId, "SendRequests");
     }
 
     private async Task HandleAcceptedRequest(string friendId, string friendUsername)
     {
-        var dbRef = FirebaseDatabase.DefaultInstance.RootReference;
-
         Debug.Log($"{friendUsername} ha aceptado tu solicitud");
 
         // Añadir a la lista de amigos del usuario actual
-        await dbRef.Child("users")
-                  .Child(currentUserId)
-                  .Child("friends")
-                  .Child(friendId)
-                  .SetValueAsync(friendUsername);
-
-        await CleanupRequests(friendId);
+        await AddFriend(currentUserId, friendId, friendUsername);
+        await RemoveRequest(friendId, "SendRequests");
+    }
+    private async Task HandleDeclineRequest(string friendId, string friendUsername)
+    {
+        Debug.Log($"{friendUsername} ha rechazado tu solicitud");
+        await RemoveRequest(friendId, "SendRequests");
     }
 
-    private async Task CleanupRequests(string friendId)
+    private async Task AddFriend(string userId, string friendId, string friendName)
     {
-        await RemoveRequest(currentUserId, "friendRequests", friendId);
-        // Eliminar de SendRequests del usuario actual
-        await RemoveRequest(friendId, "SendRequests");
-
-        // Eliminar de friendResponse del amigo (si existe)
-       
+        await FirebaseDatabase.DefaultInstance
+            .GetReference($"users/{userId}/friends/{friendId}")
+            .SetValueAsync(friendName);
     }
 
     private async Task<string> GetUserUsername(string userId)
@@ -107,35 +166,26 @@ public class FriendRequestManager : MonoBehaviour
         return usernameSnapshot.Value?.ToString() ?? "Usuario desconocido";
     }
 
-    private async Task RemoveRequest(string targetUserId, string requestType, string userId = null)
+    private async Task RemoveRequest(string targetUserId, string requestType)
     {
-        userId = userId ?? currentUserId;
-
         await FirebaseDatabase.DefaultInstance
-            .GetReference($"users/{userId}/{requestType}/{targetUserId}")
+            .GetReference($"users/{currentUserId}/{requestType}/{targetUserId}")
             .SetValueAsync(null);
-    }
-
-    // Método para rechazar una solicitud (como en tu botón original)
-    public async void RejectFriendRequest(string friendId)
-    {
-        // Actualizar el estado a 2 (rechazado) en el nodo friendResponse del amigo
-        await FirebaseDatabase.DefaultInstance
-            .GetReference($"users/{friendId}/SendRequests/{currentUserId}")
-            .SetValueAsync(2);
-
-        Debug.Log("Solicitud rechazada");
     }
 
     private void OnDisable()
     {
         var dbRef = FirebaseDatabase.DefaultInstance.RootReference;
 
-        // Escuchar nuevas respuestas a solicitudes enviadas
-        var reference = dbRef.Child("users")
+        var sentRequestsRef = dbRef.Child("users")
              .Child(currentUserId)
              .Child("SendRequests");
+        sentRequestsRef.ChildAdded -= HandleRequestResponseAdded;
 
-        reference.ChildAdded -= HandleRequestResponseAdded;
+        var receivedRequestsRef = dbRef.Child("users")
+             .Child(currentUserId)
+             .Child("friendRequests");
+       receivedRequestsRef.ChildAdded -= HandleNewRequestAdded;
+       receivedRequestsRef.ChildRemoved -= HandleRequestRemoved;
     }
 }

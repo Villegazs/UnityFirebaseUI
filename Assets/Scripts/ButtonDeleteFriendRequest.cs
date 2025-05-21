@@ -7,6 +7,6 @@ public class ButtonDeleteFriendRequest : MonoBehaviour
 
     public void OnRejectButtonClicked()
     {
-        requestManager.RejectFriendRequest(friendId);
+        //requestManager.RejectFriendRequest(friendId);
     }
 }
