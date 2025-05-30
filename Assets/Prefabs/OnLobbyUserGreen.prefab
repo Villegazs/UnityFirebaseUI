@@ -95,6 +95,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   usernameText: {fileID: 3596291958092312210}
   characterImage: {fileID: 1478549209970753610}
+  characterStats: {fileID: 3003066281956278510}
 --- !u!1 &1842384104350491463
 GameObject:
   m_ObjectHideFlags: 0

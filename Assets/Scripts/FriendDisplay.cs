@@ -10,6 +10,8 @@ public class FriendDisplay : MonoBehaviour, IPointerClickHandler
     [SerializeField] private GameObject contextMenuPrefab;
     public string FriendId { get; private set; }
     public string FriendName { get; private set; }
+    public int CharacterIndex { get; private set; }
+    // Agrega estas propiedades públicas
 
     public void Initialize(string friendId, string friendName, int characterIndex, bool isOnline)
     {
@@ -59,5 +61,10 @@ public class FriendDisplay : MonoBehaviour, IPointerClickHandler
         // 1. Abrir un chat con este amigo
         // 2. Seleccionar el amigo
         // 3. Cualquier otra acción que necesites
+    }
+
+    private void OnApplicationQuit()
+    {
+        Destroy(gameObject);
     }
 }
