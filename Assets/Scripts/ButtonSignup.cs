@@ -58,6 +58,9 @@ public class ButtonSignup : MonoBehaviour
             // insertar despues de registro exitoso
             FirebaseDatabase.DefaultInstance.RootReference
                  .Child("users").Child(result.User.UserId).Child("username").SetValueAsync(username);
+            
+            FirebaseDatabase.DefaultInstance.RootReference
+                .Child("users").Child(result.User.UserId).Child("character").SetValueAsync(0);
 
             Debug.LogFormat("Firebase user created successfully: {0} ({1})",
                 result.User.DisplayName, result.User.UserId);

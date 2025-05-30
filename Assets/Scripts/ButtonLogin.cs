@@ -1,4 +1,5 @@
 using Firebase.Auth;
+using Firebase.Database;
 using System;
 using System.Collections;
 using TMPro;
@@ -14,6 +15,8 @@ public class ButtonLogin : MonoBehaviour
     private TMP_InputField _emailInputField;
     [SerializeField]
     private TMP_InputField _passwordInputField;
+
+    [SerializeField] int characterIndex = 0;
 
 
     private void Reset()
@@ -50,6 +53,11 @@ public class ButtonLogin : MonoBehaviour
             AuthResult result = task.Result;
             Debug.LogFormat("User signed in successfully: {0} ({1})",
                 result.User.DisplayName, result.User.UserId);
+
+            characterIndex = CharacterManager.Instance.selectedIndexCharacter;
+
+            FirebaseDatabase.DefaultInstance.RootReference
+                .Child("users").Child(result.User.UserId).Child("character").SetValueAsync(characterIndex);
         });
     }
 

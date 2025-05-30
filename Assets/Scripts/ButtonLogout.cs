@@ -9,7 +9,7 @@ public class ButtonLogout : MonoBehaviour,IPointerClickHandler
     {
         var mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
         var userId = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
-        mDatabaseRef.Child("users-online").Child(userId).SetValueAsync(null);
+        //mDatabaseRef.Child("users-online").Child(userId).SetValueAsync(null);
 
         FirebaseAuth.DefaultInstance.SignOut();
        
@@ -19,8 +19,9 @@ public class ButtonLogout : MonoBehaviour,IPointerClickHandler
 
     private void OnApplicationQuit()
     {
+        //LobbyManager.Instance.LeaveLobby();
         var mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
         var userId = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
-        mDatabaseRef.Child("users-online").Child(userId).SetValueAsync(null);
+        //mDatabaseRef.Child("users-online").Child(userId).SetValueAsync(null);
     }
 }

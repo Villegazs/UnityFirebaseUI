@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3567699880547734874}
   - component: {fileID: 6923300416475084394}
   - component: {fileID: 307386050737697451}
+  - component: {fileID: 9082733262396956676}
   m_Layer: 5
   m_Name: OnLobbyUserGreen
   m_TagString: Untagged
@@ -80,6 +81,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &9082733262396956676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 494670842605364553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82088f10791d84241b6505c875920ec7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  usernameText: {fileID: 3596291958092312210}
+  characterImage: {fileID: 1478549209970753610}
 --- !u!1 &1842384104350491463
 GameObject:
   m_ObjectHideFlags: 0

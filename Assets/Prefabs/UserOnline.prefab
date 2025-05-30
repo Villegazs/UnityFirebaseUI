@@ -661,6 +661,7 @@ GameObject:
   - component: {fileID: 6732585496736081702}
   - component: {fileID: 4214675837130882381}
   - component: {fileID: 6433701761752189490}
+  - component: {fileID: 68850246819483211}
   m_Layer: 5
   m_Name: UserOnline
   m_TagString: Untagged
@@ -728,6 +729,21 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &68850246819483211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7556841021448471769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f98b5149b1ba0064da46ea1cd6aff126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nameText: {fileID: 5481370636285304019}
+  characterImage: {fileID: 384715427847143226}
+  contextMenuPrefab: {fileID: 0}
 --- !u!1 &7604907437054038413
 GameObject:
   m_ObjectHideFlags: 0

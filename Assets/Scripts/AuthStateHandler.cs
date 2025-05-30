@@ -73,6 +73,8 @@ public class AuthStateHandler : MonoBehaviour
                      PlayerPrefs.SetString("username", username);
                      mDatabaseRef.Child("users-online").Child(userId).SetValueAsync(username);
                      // Do something with snapshot...
+                     mDatabaseRef.Child("usernames").Child(userId).SetValueAsync(username);
+
                  }
              });
 
